@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFC Value Update</title>
+</head>
+<body>
+    <h1>NFC Value and Subtraction App</h1>
+
+    <!-- Button to trigger NFC scan -->
+    <button id="startScanBtn">Scan NFC Tag</button>
+
+    <!-- Display NFC Tag Data -->
+    <p id="nfcData">No NFC data scanned yet.</p>
+
+    <!-- Input to subtract amount -->
+    <div>
+        <label for="subtractAmount">Enter Amount to Subtract: </label>
+        <input type="number" id="subtractAmount" />
+        <button id="subtractBtn">Subtract</button>
+    </div>
+
+    <!-- Display the updated value -->
+    <p id="updatedValue">Updated Value: Not calculated yet.</p>
+
+    <script>
+        let currentValue = 0; // To store the NFC value
+        const startScanBtn = document.getElementById("startScanBtn");
+        const subtractBtn = document.getElementById("subtractBtn");
+        const nfcData = document.getElementById("nfcData");
+        const updatedValue = document.getElementById("updatedValue");
+
+        // Check if Web NFC API is supported
+        if (!("NFCReader" in window)) {
+            alert("Web NFC is not supported on this device or browser.");
+        } else {
+            console.log("Web NFC API is supported.");
+        }
+
+        // Start scanning NFC tag when the button is clicked
+        startScanBtn.addEventListener("click", async () => {
+            try {
+                const reader = new NFCReader(); // Create an NFC reader instance
+
+                reader.onreading = (event) => {
+                    // Get the NFC tag data
+                    const tag = event.target;
+                    currentValue = parseFloat(tag.serialNumber); // Here we assume NFC tag's serial number is the value
+                    nfcData.textContent = `NFC Tag Data: ${currentValue}`;
+                    console.log("NFC Tag Data:", tag);
+                };
+
+                reader.onerror = (error) => {
+                    console.error("Error reading NFC tag:", error);
+                };
+
+                await reader.scan();  // Start scanning NFC tag
+            } catch (e) {
+                console.error("NFC Error:", e);
+                nfcData.textContent = "Error reading NFC tag.";
+            }
+        });
+
+        // Subtract amount from NFC value
+        subtractBtn.addEventListener("click", () => {
+            const amountToSubtract = parseFloat(document.getElementById("subtractAmount").value);
+
+            if (!isNaN(amountToSubtract) && currentValue > 0) {
+                currentValue -= amountToSubtract; // Subtract the value
+                updatedValue.textContent = `Updated Value: ${currentValue.toFixed(2)}`;
+            } else {
+                updatedValue.textContent = "Invalid amount or NFC value.";
+            }
+        });
+    </script>
+</body>
+</html>
